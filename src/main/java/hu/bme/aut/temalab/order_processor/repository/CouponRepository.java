@@ -1,23 +1,7 @@
 package hu.bme.aut.temalab.order_processor.repository;
 
-import hu.bme.aut.temalab.order_processor.enums.Category;
 import hu.bme.aut.temalab.order_processor.model.Coupon;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-import java.util.Optional;
-
-public interface CouponRepository {
-    Coupon save(Coupon coupon);
-
-    Optional<Coupon> findById(long id);
-
-    List<Coupon> findByName(String name);
-
-    List<Coupon> findByTargetCategory(Category targetCategory);
-
-    List<Coupon> findByValue(int value);
-
-    Coupon update(Coupon coupon);
-
-    void delete(Coupon coupon);
+public interface CouponRepository extends JpaRepository<Coupon, Long> {
 }

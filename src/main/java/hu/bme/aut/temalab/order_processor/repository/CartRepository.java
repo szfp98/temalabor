@@ -1,22 +1,10 @@
 package hu.bme.aut.temalab.order_processor.repository;
 
-import hu.bme.aut.temalab.order_processor.enums.CartStatus;
 import hu.bme.aut.temalab.order_processor.model.Cart;
-import hu.bme.aut.temalab.order_processor.model.users.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 
-public interface CartRepository {
-    Cart save(Cart cart);
-
-    Optional<Cart> findById(long id);
-
-    List<Cart> findByUser(User user);
-
-    List<Cart> findByStatus(CartStatus status);
-
-    Cart update(Cart cart);
-
-    void delete(Cart cart);
+public interface CartRepository extends JpaRepository<Cart, Long> {
+    Optional<Cart> findByUserId(Long userId);
 }
