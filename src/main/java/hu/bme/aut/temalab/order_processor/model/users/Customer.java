@@ -1,13 +1,18 @@
 package hu.bme.aut.temalab.order_processor.model.users;
 
 import hu.bme.aut.temalab.order_processor.model.Order;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import lombok.*;
 
 import java.util.List;
-
+@Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Customer extends User{
-    List<Order> orderHistory;
+    @OneToMany(mappedBy = "user")
+    private List<Order> orderHistory;
 }

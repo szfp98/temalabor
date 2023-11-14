@@ -1,5 +1,13 @@
 package hu.bme.aut.temalab.order_processor.model.users;
 
-public class OrderManager extends User{
+import jakarta.persistence.Entity;
+import lombok.*;
 
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class OrderManager extends User{
 }
