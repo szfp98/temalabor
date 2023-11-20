@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
-    ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     @Transactional(readOnly = true)
     public List<Product> getAllProducts() {

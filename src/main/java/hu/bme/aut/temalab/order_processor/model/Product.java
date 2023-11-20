@@ -26,6 +26,7 @@ public class Product {
 
     private BigDecimal value;
 
+    @OneToMany
     private List<Component> components;
 
     public BigDecimal getPrice() {
