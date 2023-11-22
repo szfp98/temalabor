@@ -6,8 +6,9 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
+//@NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class OrderManager extends User{
+
 }
