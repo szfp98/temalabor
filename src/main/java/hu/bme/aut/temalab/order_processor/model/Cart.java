@@ -29,4 +29,8 @@ public class Cart {
 
     @OneToMany(mappedBy = "cart")
     private Set<CartItem> cartItems;
+    
+    public Set<CartItem> getContent(){
+    	return cartItems;
+    }
 }
