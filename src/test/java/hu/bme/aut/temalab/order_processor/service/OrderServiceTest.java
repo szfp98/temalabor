@@ -2,11 +2,8 @@ package hu.bme.aut.temalab.order_processor.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import hu.bme.aut.temalab.order_processor.enums.OrderStatus;
-import hu.bme.aut.temalab.order_processor.enums.PaymentMethod;
-import hu.bme.aut.temalab.order_processor.enums.ShippingMethod;
+import hu.bme.aut.temalab.order_processor.enums.*;
 import hu.bme.aut.temalab.order_processor.model.*;
-import hu.bme.aut.temalab.order_processor.model.users.Customer;
 import hu.bme.aut.temalab.order_processor.model.users.User;
 import hu.bme.aut.temalab.order_processor.repository.CartRepository;
 import hu.bme.aut.temalab.order_processor.repository.OrderRepository;
@@ -16,13 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderServiceTest {
@@ -36,28 +31,37 @@ public class OrderServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private User user;
+
+    @Mock
+    private Cart cart;
+
+    @Mock
+    private Order order;
+
+    @Mock
+    private Address shippingAddress;
+
+    @Mock
+    private Product product;
+
+    @Mock
+    private CartItem cartItem;
+
+    @Mock
+    private Coupon coupon;
+
     @InjectMocks
     private OrderService orderService;
 
-    private User user;
-    private Cart cart;
-    private Order order;
-
     @BeforeEach
     void setUp() {
-        user = new Customer(/* inicializálás */);
-        cart = new Cart(/* inicializálás */);
-        order = new Order(/* inicializálás */);
-
-        Product product = new Product(/* inicializálás */);
-        CartItem cartItem = new CartItem(/* inicializálás */);
-        cartItem.setProduct(product);
-        cartItem.setQuantity(2);
-        cartItem.setCart(cart);
-
         Set<CartItem> cartItems = new HashSet<>();
         cartItems.add(cartItem);
-        cart.setCartItems(cartItems);
+
+        List<Coupon> coupons = new ArrayList<>();
+        coupons.add(coupon);
     }
 
     @Test
@@ -69,14 +73,29 @@ public class OrderServiceTest {
 
     @Test
     void createOrderTest() {
-        Address shippingAddress = new Address(/* inicializálás */);
         PaymentMethod paymentMethod = PaymentMethod.DEBIT_CARD;
         ShippingMethod shippingMethod = ShippingMethod.STANDARD;
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
         when(cartRepository.findById(anyLong())).thenReturn(Optional.of(cart));
-        when(cart.getCartItems()).thenReturn(cart.getCartItems());
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
+
+        Cart mockCart = Mockito.mock(Cart.class);
+
+        CartItem mockCartItem = Mockito.mock(CartItem.class);
+        Product mockProduct = Mockito.mock(Product.class);
+        when(mockProduct.getPrice()).thenReturn(new BigDecimal("50.00"));
+
+        when(mockCartItem.getProduct()).thenReturn(mockProduct);
+        when(mockCartItem.getQuantity()).thenReturn(2);
+
+        Set<CartItem> mockCartItems = new HashSet<>();
+        mockCartItems.add(mockCartItem);
+
+        when(mockCart.getCartItems()).thenReturn(mockCartItems);
+        when(cartRepository.findById(anyLong())).thenReturn(Optional.of(mockCart));
+
+        Order mockOrder = Mockito.mock(Order.class);
+        when(orderRepository.save(any(Order.class))).thenReturn(mockOrder);
 
         Order createdOrder = orderService.createOrder(1L, 1L, shippingAddress, paymentMethod, shippingMethod);
 
