@@ -114,12 +114,23 @@ public class OrderServiceTest {
 
     @Test
     void updateOrderStatusTest() {
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
+        Order testOrder = new Order();
+        testOrder.setStatus(OrderStatus.PROCESSING);
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(testOrder));
+
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> {
+            Order argOrder = invocation.getArgument(0, Order.class);
+            argOrder.setStatus(OrderStatus.NEW);
+            return argOrder;
+        });
 
         Order updatedOrder = orderService.updateOrderStatus(1L, OrderStatus.NEW);
+        assertNotNull(updatedOrder, "Az Order objektum nem lehet null");
         assertEquals(OrderStatus.NEW, updatedOrder.getStatus());
         verify(orderRepository).findById(anyLong());
         verify(orderRepository).save(any(Order.class));
     }
+
+
+
 }
