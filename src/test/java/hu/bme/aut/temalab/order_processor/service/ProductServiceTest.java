@@ -1,6 +1,7 @@
 package hu.bme.aut.temalab.order_processor.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -9,11 +10,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import hu.bme.aut.temalab.order_processor.enums.Category;
+import hu.bme.aut.temalab.order_processor.model.Component;
 import hu.bme.aut.temalab.order_processor.model.Product;
 import hu.bme.aut.temalab.order_processor.repository.ProductRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.math.BigDecimal;
 import java.util.Arrays;
 
 public class ProductServiceTest {
@@ -42,6 +46,31 @@ public class ProductServiceTest {
         assertNotNull(products);
         assertEquals(2, products.size());
         verify(productRepository).findAll();
+    }
+
+    @Test
+    public void testCreateProduct() {
+        String name = "Test Product";
+        Category category = Category.CLOTHING;
+        BigDecimal value = BigDecimal.valueOf(100.0);
+        List<Component> components = Arrays.asList(new Component(), new Component()); // Initialize as needed
+
+        Product productToCreate = new Product();
+        productToCreate.setName(name);
+        productToCreate.setCategory(category);
+        productToCreate.setValue(value);
+        productToCreate.setComponents(components);
+
+        when(productRepository.save(any(Product.class))).thenReturn(productToCreate);
+
+        Product createdProduct = productService.createProduct(name, category, value, components);
+
+        assertNotNull(createdProduct);
+        assertEquals(name, createdProduct.getName());
+        assertEquals(category, createdProduct.getCategory());
+        assertEquals(value, createdProduct.getValue());
+        assertEquals(components, createdProduct.getComponents());
+        verify(productRepository).save(any(Product.class));
     }
 
     @Test
