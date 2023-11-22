@@ -25,8 +25,7 @@ import java.util.Optional;
 @Slf4j
 public class CartService {
 
+  @Transactional(readOnly = true)
+	public List<Product> getCartContent();
 
-	@Transactional(readOnly = true)
-	public List<Product> getCartContent()
-	
 }
