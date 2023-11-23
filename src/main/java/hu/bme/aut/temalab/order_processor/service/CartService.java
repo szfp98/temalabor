@@ -1,4 +1,5 @@
 package hu.bme.aut.temalab.order_processor.service;
+import hu.bme.aut.temalab.order_processor.enums.CartStatus;
 import hu.bme.aut.temalab.order_processor.enums.OrderStatus;
 import hu.bme.aut.temalab.order_processor.enums.PaymentMethod;
 import hu.bme.aut.temalab.order_processor.enums.ShippingMethod;
@@ -19,13 +20,43 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class CartService {
+	
+	private final CartRepository cartRepository;
+	private final UserRepository userRepository;
 
   @Transactional(readOnly = true)
-	public List<Product> getCartContent();
+	public Set<CartItem> getCartContent(Long userID){
+	  return cartRepository.findByUserId(userID).get().getContent();
+  }
+  
+  @Transactional
+  public void addItem(CartItem ci, Long userID) {
+	  cartRepository.findByUserId(userID).get().addItem(ci);
+  }
+  
+  public void removeItem(CartItem ci, Long userID) {
+	  cartRepository.findByUserId(userID).get().removeItem(ci);
+  }
 
+  public Cart createCart(Long id, User user) {
+	  
+	  User userExists = userRepository.findById(user.getId)
+              .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+	  
+	  Cart cart = new Cart();
+	  cart.setID(userExists);
+	  cart.setStatus(CartStatus.OPEN);
+	  cart.setSubTotal(0);
+	  cart.setUser(user);
+	  
+	  return cartRepository.save(cart);
+	  
+  }
+  
 }

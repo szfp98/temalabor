@@ -33,4 +33,11 @@ public class Cart {
     public Set<CartItem> getContent(){
     	return cartItems;
     }
+    
+    public void addItem(CartItem ci) {
+    	cartItems.add(ci);
+    }
+    public void removeItem(CartItem ci) {
+    	cartItems.remove(ci);
+    }
 }
