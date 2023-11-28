@@ -46,13 +46,13 @@ public class CartService {
 
   public Cart createCart(Long id, User user) {
 	  
-	  User userExists = userRepository.findById(user.getId)
+	  User userExists = userRepository.findById(user.getId())
               .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
 	  
 	  Cart cart = new Cart();
-	  cart.setID(userExists);
+	  cart.setId(userExists.getId());
 	  cart.setStatus(CartStatus.OPEN);
-	  cart.setSubTotal(0);
+	  cart.setSubtotal(new BigDecimal(0));
 	  cart.setUser(user);
 	  
 	  return cartRepository.save(cart);
