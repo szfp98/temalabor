@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import hu.bme.aut.temalab.order_processor.enums.Category;
@@ -26,11 +27,11 @@ public class Product {
 
     private BigDecimal value;
 
-    @OneToMany
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Component> components;
 
     public BigDecimal getPrice() {
         // TODO
-        return null;
+        return new BigDecimal(100);
     }
 }

@@ -6,17 +6,19 @@ import hu.bme.aut.temalab.order_processor.enums.Category;
 import hu.bme.aut.temalab.order_processor.enums.Unit;
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = "component_id")
 public class Component {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @Column(name = "component_id")
+    private long componentId;
 
     private String name;
 
@@ -27,4 +29,8 @@ public class Component {
 
     @Enumerated(EnumType.STRING)
     private Unit unit;
+
+    @ManyToOne
+    @JoinColumn(name = "id")
+    private Product product;
 }

@@ -18,8 +18,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@AutoConfigureTestDatabase
+@SpringBootTest(properties = {"spring.config.name=application-test"})
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class OrderServiceIT {
 
     @Autowired
