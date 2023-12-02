@@ -13,12 +13,12 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "component_id")
+@EqualsAndHashCode(of = "id")
 public class Component {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "component_id")
-    private long componentId;
+    @Column(name = "id")
+    private long id;
 
     private String name;
 
@@ -31,6 +31,6 @@ public class Component {
     private Unit unit;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "product_id")
     private Product product;
 }
