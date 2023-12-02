@@ -1,22 +1,16 @@
 package hu.bme.aut.temalab.order_processor.service;
 
-import hu.bme.aut.temalab.order_processor.enums.CartStatus;
-import hu.bme.aut.temalab.order_processor.enums.OrderStatus;
-import hu.bme.aut.temalab.order_processor.enums.PaymentMethod;
-import hu.bme.aut.temalab.order_processor.enums.ShippingMethod;
-import hu.bme.aut.temalab.order_processor.model.Address;
-import hu.bme.aut.temalab.order_processor.model.Cart;
-import hu.bme.aut.temalab.order_processor.model.Order;
+import hu.bme.aut.temalab.order_processor.enums.*;
+import hu.bme.aut.temalab.order_processor.model.*;
 import hu.bme.aut.temalab.order_processor.model.users.Customer;
 import hu.bme.aut.temalab.order_processor.model.users.User;
-import hu.bme.aut.temalab.order_processor.repository.CartRepository;
-import hu.bme.aut.temalab.order_processor.repository.OrderRepository;
-import hu.bme.aut.temalab.order_processor.repository.UserRepository;
+import hu.bme.aut.temalab.order_processor.repository.*;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
@@ -24,7 +18,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {"spring.config.name=application-test"})
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class OrderServiceIT {
 
     @Autowired
@@ -39,9 +34,17 @@ public class OrderServiceIT {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private AddressRepository addressRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
     private User testUser;
     private Cart testCart;
     private Address testAddress;
+
+    private Product testProduct;
 
     @BeforeEach
     void setUp() {
@@ -61,6 +64,21 @@ public class OrderServiceIT {
         testAddress.setZipCode("1234");
         testAddress.setHouseNumber("42");
         testAddress.setComment("Delivery instructions");
+        addressRepository.save(testAddress);
+
+        testProduct = new Product();
+        testProduct.setName("Test Product");
+        testProduct.setCategory(Category.ELECTRONICS);
+        testProduct.setValue(new BigDecimal("10.00"));
+        productRepository.save(testProduct);
+
+        CartItem testCartItem = new CartItem();
+        testCartItem.setCart(testCart);
+        testCartItem.setProduct(testProduct);
+        testCartItem.setQuantity(1);
+
+        testCart.addItem(testCartItem);
+        cartRepository.save(testCart);
     }
 
     @AfterEach

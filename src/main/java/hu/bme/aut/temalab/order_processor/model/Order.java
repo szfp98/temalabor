@@ -4,12 +4,16 @@ import hu.bme.aut.temalab.order_processor.enums.PaymentMethod;
 import hu.bme.aut.temalab.order_processor.enums.ShippingMethod;
 import hu.bme.aut.temalab.order_processor.model.users.User;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
+@Table(name = "orders")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,8 +35,8 @@ public class Order {
 
     private String comment;
 
-    @OneToMany
-    private List<Coupon> coupons;
+    @ElementCollection
+    private Set<Long> couponIds = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
