@@ -44,8 +44,6 @@ public class OrderServiceIT {
     private Cart testCart;
     private Address testAddress;
 
-    private Product testProduct;
-
     @BeforeEach
     void setUp() {
         testUser = new Customer();
@@ -66,7 +64,7 @@ public class OrderServiceIT {
         testAddress.setComment("Delivery instructions");
         addressRepository.save(testAddress);
 
-        testProduct = new Product();
+        Product testProduct = new Product();
         testProduct.setName("Test Product");
         testProduct.setCategory(Category.ELECTRONICS);
         testProduct.setValue(new BigDecimal("10.00"));
