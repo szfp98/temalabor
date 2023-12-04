@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 
@@ -57,9 +58,18 @@ public class CaerServiceTest {
 
     @Test
     void addItemTest(){
-        
+        HashSet<CartItem> set = new HashSet<CartItem>();
+        CartItem ci = new CartItem();
+        set.add(ci);
+        Cart ca = new Cart();
+        ca.setCartItems(set);
 
+        Cart mockCart = Mockito.mock(Cart.class);
+        mockCart.addItem(ci);
 
+        when(mockCart.getCartItems()).thenReturn(set);
+        when(cartService.getCartbyId(anyLong())).thenReturn(Optional.of(mockCart));
+        assertNotNull(cartService.getCartContent(1L));
     }
 
 
