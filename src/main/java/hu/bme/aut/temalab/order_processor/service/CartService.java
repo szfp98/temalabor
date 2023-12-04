@@ -34,16 +34,24 @@ public class CartService {
 	public Set<CartItem> getCartContent(Long userID){
 	  return cartRepository.findByUserId(userID).get().getContent();
   }
-  
+
+
+  @Transactional
+  public Optional<Cart> getCartbyId(Long id){
+	  return cartRepository.findById(id);
+  }
+
   @Transactional
   public void addItem(CartItem ci, Long userID) {
 	  cartRepository.findByUserId(userID).get().addItem(ci);
   }
-  
+
+  @Transactional
   public void removeItem(CartItem ci, Long userID) {
 	  cartRepository.findByUserId(userID).get().removeItem(ci);
   }
 
+  @Transactional
   public Cart createCart(Long id, User user) {
 	  
 	  User userExists = userRepository.findById(user.getId())
