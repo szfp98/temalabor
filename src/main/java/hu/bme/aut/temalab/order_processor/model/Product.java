@@ -25,6 +25,7 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private Category category;
 
+    @Column(name = "product_price_value")
     private BigDecimal value;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

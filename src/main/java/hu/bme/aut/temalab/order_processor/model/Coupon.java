@@ -20,5 +20,6 @@ public class Coupon {
     @Enumerated(EnumType.STRING)
     private Category targetCategory;
 
+    @Column(name = "coupon_value")
     private int value;
 }

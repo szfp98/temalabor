@@ -25,6 +25,7 @@ public class Component {
     @Enumerated(EnumType.STRING)
     private Category category;
 
+    @Column(name = "comp_value")
     private BigDecimal value;
 
     @Enumerated(EnumType.STRING)
