@@ -27,11 +27,13 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<List<OrderDto>> getAllOrders() {
+        log.debug("Received request to get all orders");
         try {
             List<Order> orders = orderService.getAllOrders();
             List<OrderDto> orderDtos = orders.stream()
                     .map(order -> modelMapper.map(order, OrderDto.class))
                     .collect(Collectors.toList());
+            log.debug("Retrieved {} orders", orderDtos.size());
             return ResponseEntity.ok(orderDtos);
         } catch (Exception e) {
             log.error("Error fetching orders", e);
@@ -41,12 +43,15 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable Long id) {
+        log.debug("Received request to get order by id: {}", id);
         try {
             Optional<Order> orderOptional = orderService.getOrderById(id);
             if (orderOptional.isPresent()) {
                 OrderDto orderDto = modelMapper.map(orderOptional.get(), OrderDto.class);
+                log.debug("Order found with id: {}", id);
                 return ResponseEntity.ok(orderDto);
             } else {
+                log.debug("No order found with id: {}", id);
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
@@ -57,9 +62,11 @@ public class OrderController {
 
     @PutMapping("/{id}")
     public ResponseEntity<OrderDto> updateOrderStatus(@PathVariable Long id, @RequestBody OrderStatusDto statusDto) {
+        log.debug("Received request to update order status for id: {}, status: {}", id, statusDto.getStatus());
         try {
             Order order = orderService.updateOrderStatus(id, OrderStatus.valueOf(statusDto.getStatus()));
             OrderDto orderDto = modelMapper.map(order, OrderDto.class);
+            log.debug("Order status updated for id: {}", id);
             return ResponseEntity.ok(orderDto);
         } catch (RuntimeException e) {
             log.error("Error updating order status", e);
@@ -69,6 +76,4 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-
 }
