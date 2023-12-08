@@ -18,7 +18,6 @@ public class OrderProcessorApplication implements CommandLineRunner{
 
     @Override
     public void run(String... args) throws Exception {
-
         initDbService.initDb();
     }
 
