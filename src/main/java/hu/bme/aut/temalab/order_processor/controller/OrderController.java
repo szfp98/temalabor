@@ -26,8 +26,21 @@ public class OrderController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public ResponseEntity<List<OrderDto>> getAllOrders() {
-        log.debug("Received request to get all orders");
+    public ResponseEntity<?> getOrders(@RequestParam(required = false) Long id,
+                                       @RequestParam(required = false) Long userId) {
+        if (id != null) {
+            log.debug("Received request to get order by id: {}", id);
+            return getOrderById(id);
+        } else if (userId != null) {
+            log.debug("Received request to get orders for user: {}", userId);
+            return getOrdersByUserId(userId);
+        } else {
+            log.debug("Received request to get all orders");
+            return getAllOrders();
+        }
+    }
+
+    private ResponseEntity<List<OrderDto>> getAllOrders() {
         try {
             List<Order> orders = orderService.getAllOrders();
             List<OrderDto> orderDtos = orders.stream()
@@ -41,9 +54,7 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<OrderDto> getOrderById(@PathVariable Long id) {
-        log.debug("Received request to get order by id: {}", id);
+    private ResponseEntity<OrderDto> getOrderById(Long id) {
         try {
             Optional<Order> orderOptional = orderService.getOrderById(id);
             if (orderOptional.isPresent()) {
@@ -60,8 +71,22 @@ public class OrderController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<OrderDto> updateOrderStatus(@PathVariable Long id, @RequestBody OrderStatusDto statusDto) {
+    private ResponseEntity<List<OrderDto>> getOrdersByUserId(Long userId) {
+        try {
+            List<Order> orders = orderService.getOrdersByUserId(userId);
+            List<OrderDto> orderDtos = orders.stream()
+                    .map(order -> modelMapper.map(order, OrderDto.class))
+                    .collect(Collectors.toList());
+            log.debug("Retrieved {} orders for user {}", orderDtos.size(), userId);
+            return ResponseEntity.ok(orderDtos);
+        } catch (Exception e) {
+            log.error("Error fetching orders for user " + userId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping
+    public ResponseEntity<OrderDto> updateOrderStatus(@RequestParam Long id, @RequestBody OrderStatusDto statusDto) {
         log.debug("Received request to update order status for id: {}, status: {}", id, statusDto.getStatus());
         try {
             Order order = orderService.updateOrderStatus(id, OrderStatus.valueOf(statusDto.getStatus()));
