@@ -46,10 +46,7 @@ public class OrderServiceIT {
 
     @BeforeEach
     void setUp() {
-        testUser = new Customer();
-        testUser.setName("Test User");
-        testUser.setEmail("test@example.com");
-        userRepository.save(testUser);
+        testUser = userRepository.save(Customer.builder().name("Test User").email("test@example.com").build());
 
         testCart = new Cart();
         testCart.setStatus(CartStatus.OPEN);

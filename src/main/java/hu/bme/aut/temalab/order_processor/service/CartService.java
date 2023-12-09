@@ -68,8 +68,7 @@ public class CartService {
         cart.setSubtotal(calculateSubtotal(cartId));
 
         cartItemRepository.save(newItem);
-        cartRepository.save(cart);
-        return cart;
+        return cartRepository.save(cart);
     }
 
     @Transactional

@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import hu.bme.aut.temalab.order_processor.enums.Category;
@@ -33,7 +34,15 @@ public class Product {
     private List<Component> components;
 
     public BigDecimal getPrice() {
-        // TODO
-        return new BigDecimal(100);
+        return value;
+    }
+
+    public void addComponent(Component component) {
+        if(component==null)
+            throw new IllegalArgumentException("Component cannot be null.");
+        if(this.components == null)
+            this.components = new ArrayList<>();
+        this.components.add(component);
+        component.setProduct(this);
     }
 }
