@@ -3,89 +3,102 @@ package hu.bme.aut.temalab.order_processor.service;
 import hu.bme.aut.temalab.order_processor.enums.*;
 import hu.bme.aut.temalab.order_processor.model.*;
 import hu.bme.aut.temalab.order_processor.model.users.Customer;
-import hu.bme.aut.temalab.order_processor.model.users.OrderManager;
-import hu.bme.aut.temalab.order_processor.model.users.User;
 import hu.bme.aut.temalab.order_processor.repository.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InitDbService {
 
-    private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
+    private final ComponentRepository componentRepository;
     private final AddressRepository addressRepository;
     private final CouponRepository couponRepository;
-    private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
-    private final ProductRepository productRepository;
-    private final ComponentRepository componentRepository;
-    private final UserRepository userRepository;
-    private final CustomerRepository customerRepository;
-    private final OrderManagerRepository orderManagerRepository;
+
+    private final ProductService productService;
+    private final CartService cartService;
+    private final OrderService orderService;
 
     @Transactional
     public void initDb() {
-        Customer customer1 = new Customer();
-        customer1.setName("Mikorka Kálmán");
-        customer1.setEmail("mikorka@example.com");
+        try {
+            List<Customer> users = createUsers();
+            List<Product> products = createProductsAndComponents();
 
-        OrderManager manager1 = new OrderManager();
-        manager1.setName("Golyvás Irén");
-        manager1.setEmail("golyvas@example.com");
+            for (int i = 0; i < users.size(); i++) {
+                Cart cart = cartService.createCart(users.get(i).getId());
+                cartService.addItemToCart(cart.getId(), products.get(i).getId(), i + 1);
 
-        Product product1 = new Product();
-        product1.setName("Product1");
-        product1.setCategory(Category.ELECTRONICS);
-        product1.setValue(new BigDecimal(100));
+                String zipCode = "1234" + i;
+                String city = "Város " + i;
+                String street = "Utca " + i;
+                String houseNumber = String.valueOf(i);
+                String comment = "Megjegyzés " + i;
 
-        Component component1 = new Component();
-        component1.setName("Component1");
-        component1.setCategory(Category.ELECTRONICS);
-        component1.setValue(new BigDecimal(100));
-        component1.setUnit(Unit.x);
-        component1.setProduct(product1);
+                String couponName = "Kupon " + i;
+                Category couponCategory = Category.values()[i % Category.values().length];
+                int couponValue = 10 * (i + 1);
 
-        Cart cart1 = new Cart();
-        cart1.setUser(customer1);
-        cart1.setStatus(CartStatus.OPEN);
-        cart1.setSubtotal(new BigDecimal(100));
+                Address address = createAddress(users.get(i), zipCode, city, street, houseNumber, comment);
+                Coupon coupon = createCoupon(couponName, couponCategory, couponValue);
 
-        CartItem cartItem1 = new CartItem();
-        cartItem1.setCart(cart1);
-        cartItem1.setProduct(product1);
-        cartItem1.setQuantity(2);
-        cart1.addItem(cartItem1);
+                Order order = orderService.createOrder(users.get(i).getId(), cart.getId(), address, PaymentMethod.values()[i % PaymentMethod.values().length], ShippingMethod.values()[i % ShippingMethod.values().length]);
+                orderService.addCouponToOrder(order.getId(), coupon.getId());
+            }
 
-        Order order1 = new Order();
-        order1.setUser(customer1);
-        order1.setStatus(OrderStatus.NEW);
-        order1.setPaymentMethod(PaymentMethod.CREDIT_CARD);
-        order1.setShippingMethod(ShippingMethod.STANDARD);
-
-        Address address1 = new Address();
-        address1.setUser(customer1);
-        address1.setZipCode("12345");
-        address1.setCity("City1");
-        address1.setStreet("Street1");
-        address1.setHouseNumber("1A");
-
-        Coupon coupon1 = new Coupon();
-        coupon1.setName("Coupon1");
-        coupon1.setTargetCategory(Category.ELECTRONICS);
-        coupon1.setValue(10);
-
-        customerRepository.save(customer1);
-        orderManagerRepository.save(manager1);
-        productRepository.save(product1);
-        componentRepository.save(component1);
-        cartRepository.save(cart1);
-        cartItemRepository.save(cartItem1);
-        orderRepository.save(order1);
-        addressRepository.save(address1);
-        couponRepository.save(coupon1);
+        } catch (Exception e) {
+            log.error("Error initializing database: {}", e.getMessage());
+        }
     }
+
+    private List<Customer> createUsers() {
+        return Arrays.asList(
+                userRepository.save(Customer.builder().name("John Doe").email("john.doe@example.com").build()),
+                userRepository.save(Customer.builder().name("Jane Doe").email("jane.doe@example.com").build()),
+                userRepository.save(Customer.builder().name("Jim Beam").email("jim.beam@example.com").build())
+        );
+    }
+
+    private List<Product> createProductsAndComponents() {
+        Component component1 = componentRepository.save(Component.builder().name("Komponens 1.1").category(Category.ELECTRONICS).value(new BigDecimal(1)).unit(Unit.KG).build());
+        Component component2 = componentRepository.save(Component.builder().name("Komponens 1.2").category(Category.ELECTRONICS).value(new BigDecimal(1)).unit(Unit.KG).build());
+        Component component3 = componentRepository.save(Component.builder().name("Komponens 2.1").category(Category.BOOKS).value(new BigDecimal(1)).unit(Unit.X).build());
+        Component component4 = componentRepository.save(Component.builder().name("Komponens 2.2").category(Category.BOOKS).value(new BigDecimal(1)).unit(Unit.X).build());
+        Component component5 = componentRepository.save(Component.builder().name("Komponens 3.1").category(Category.CLOTHING).value(new BigDecimal(1)).unit(Unit.G).build());
+        Component component6 = componentRepository.save(Component.builder().name("Komponens 3.2").category(Category.CLOTHING).value(new BigDecimal(1)).unit(Unit.G).build());
+
+        Product product1 = productService.createProduct("Termék 1", Category.ELECTRONICS, new BigDecimal(1000), Arrays.asList(component1, component2));
+        Product product2 = productService.createProduct("Termék 2", Category.BOOKS, new BigDecimal(2000), Arrays.asList(component3, component4));
+        Product product3 = productService.createProduct("Termék 3", Category.CLOTHING, new BigDecimal(3000), Arrays.asList(component5, component6));
+
+        return Arrays.asList(product1, product2, product3);
+    }
+
+    private Address createAddress(Customer user, String zipCode, String city, String street, String houseNumber, String comment) {
+        return addressRepository.save(Address.builder()
+                .user(user)
+                .zipCode(zipCode)
+                .city(city)
+                .street(street)
+                .houseNumber(houseNumber)
+                .comment(comment)
+                .build());
+    }
+
+    private Coupon createCoupon(String name, Category targetCategory, int value) {
+        return couponRepository.save(Coupon.builder()
+                .name(name)
+                .targetCategory(targetCategory)
+                .value(value)
+                .build());
+    }
+
 }
