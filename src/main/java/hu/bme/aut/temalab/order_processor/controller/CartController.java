@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class CartController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public ResponseEntity<Set<CartItemDto>> getCartContent(Long userId) {
+    public ResponseEntity<Set<CartItemDto>> getCartContent(@RequestParam Long userId) {
         try{
             Set<CartItem> cartContent = cartService.getCartContent(userId);
             Set<CartItemDto> cid = cartContent.stream().map(cartItem -> modelMapper.map(cartItem, CartItemDto.class)).collect(Collectors.toSet());
@@ -51,7 +52,7 @@ public class CartController {
                 return ResponseEntity.ok(cid);
             }
             else{
-                return ResponseEntity.notFound().build()
+                return ResponseEntity.notFound().build();
             }
         }
         catch (Exception e){
