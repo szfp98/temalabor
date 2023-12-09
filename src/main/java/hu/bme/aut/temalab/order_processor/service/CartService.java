@@ -8,16 +8,16 @@ import hu.bme.aut.temalab.order_processor.model.Cart;
 import hu.bme.aut.temalab.order_processor.model.CartItem;
 import hu.bme.aut.temalab.order_processor.model.Order;
 import hu.bme.aut.temalab.order_processor.model.Product;
+import hu.bme.aut.temalab.order_processor.model.users.Customer;
 import hu.bme.aut.temalab.order_processor.model.users.User;
-import hu.bme.aut.temalab.order_processor.repository.CartRepository;
-import hu.bme.aut.temalab.order_processor.repository.OrderRepository;
-import hu.bme.aut.temalab.order_processor.repository.UserRepository;
+import hu.bme.aut.temalab.order_processor.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -26,45 +26,98 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public class CartService {
-	
-	private final CartRepository cartRepository;
-	private final UserRepository userRepository;
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
+    private final UserRepository userRepository;
+    private final ProductRepository productRepository;
 
-  @Transactional(readOnly = true)
-	public Set<CartItem> getCartContent(Long userID){
-	  return cartRepository.findByUserId(userID).get().getContent();
-  }
+    @Transactional
+    public Cart createCart(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
+        if (!(user instanceof Customer)) {
+            throw new RuntimeException("User with id: " + userId + " is not a customer");
+        }
 
-  @Transactional
-  public Optional<Cart> getCartbyId(Long id){
-	  return cartRepository.findById(id);
-  }
+        Cart cart = Cart.builder()
+                .status(CartStatus.OPEN)
+                .user(user)
+                .cartItems(new HashSet<>())
+                .subtotal(BigDecimal.ZERO)
+                .build();
 
-  @Transactional
-  public void addItem(CartItem ci, Long userID) {
-	  cartRepository.findByUserId(userID).get().addItem(ci);
-  }
+        return cartRepository.save(cart);
+    }
 
-  @Transactional
-  public void removeItem(CartItem ci, Long userID) {
-	  cartRepository.findByUserId(userID).get().removeItem(ci);
-  }
+    @Transactional
+    public Cart addItemToCart(Long cartId, Long productId, Integer quantity) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart not found with id: " + cartId));
 
-  @Transactional
-  public Cart createCart(Long id, User user) {
-	  
-	  User userExists = userRepository.findById(user.getId())
-              .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-	  
-	  Cart cart = new Cart();
-	  cart.setId(userExists.getId());
-	  cart.setStatus(CartStatus.OPEN);
-	  cart.setSubtotal(new BigDecimal(0));
-	  cart.setUser(user);
-	  
-	  return cartRepository.save(cart);
-	  
-  }
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+
+        CartItem newItem = CartItem.builder()
+                .cart(cart)
+                .product(product)
+                .quantity(quantity)
+                .build();
+
+        cart.addItem(newItem);
+        cart.setSubtotal(calculateSubtotal(cartId));
+
+        cartItemRepository.save(newItem);
+        cartRepository.save(cart);
+        return cart;
+    }
+
+    @Transactional
+    public void removeItemFromCart(Long cartId, Long cartItemId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart not found with id: " + cartId));
+
+        CartItem itemToRemove = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found with id: " + cartItemId));
+
+        cart.removeItem(itemToRemove);
+        cart.setSubtotal(calculateSubtotal(cartId));
+
+        cartItemRepository.delete(itemToRemove);
+        cartRepository.save(cart);
+    }
+
+    @Transactional
+    public Optional<Cart> getCartbyId(Long id){
+        return cartRepository.findById(id);
+    }
+
+    @Transactional
+    public Cart updateCartStatus(Long cartId, CartStatus newStatus) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart not found with id: " + cartId));
+
+        cart.setStatus(newStatus);
+        return cartRepository.save(cart);
+    }
+
+    @Transactional(readOnly = true)
+    public Set<CartItem> getCartContent(Long cartId) {
+        return cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart not found with id: " + cartId))
+                .getCartItems();
+    }
+
+    private BigDecimal calculateSubtotal(Long cartId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart not found with id: " + cartId));
+
+        BigDecimal subtotal = BigDecimal.ZERO;
+        for (CartItem item : cart.getCartItems()) {
+            subtotal = subtotal.add(item.getProduct().getPrice().multiply(new BigDecimal(item.getQuantity())));
+        }
+
+        return subtotal;
+    }
   
 }

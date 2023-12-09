@@ -3,6 +3,7 @@ import hu.bme.aut.temalab.order_processor.enums.OrderStatus;
 import hu.bme.aut.temalab.order_processor.enums.PaymentMethod;
 import hu.bme.aut.temalab.order_processor.enums.ShippingMethod;
 import hu.bme.aut.temalab.order_processor.model.*;
+import hu.bme.aut.temalab.order_processor.model.users.Customer;
 import hu.bme.aut.temalab.order_processor.model.users.User;
 import hu.bme.aut.temalab.order_processor.repository.CartRepository;
 import hu.bme.aut.temalab.order_processor.repository.CouponRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -40,6 +42,9 @@ public class OrderService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        if (!(user instanceof Customer customer)) {
+            throw new RuntimeException("User with id: " + userId + " is not a customer");
+        }
 
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Cart not found with id: " + cartId));
@@ -48,16 +53,21 @@ public class OrderService {
             throw new RuntimeException("Cart is empty");
         }
 
-        Order order = new Order();
-        order.setUser(user);
-        order.setAddress(shippingAddress);
-        order.setPaymentMethod(paymentMethod);
-        order.setShippingMethod(shippingMethod);
-        order.setStatus(OrderStatus.NEW);
-        order.setTotal(calculateTotal(cart, order.getCouponIds()));
-        order.setCart(cart);
+        Order order = Order.builder()
+                .user(customer)
+                .address(shippingAddress)
+                .paymentMethod(paymentMethod)
+                .shippingMethod(shippingMethod)
+                .status(OrderStatus.NEW)
+                .total(calculateTotal(cart, new HashSet<>()))
+                .cart(cart)
+                .build();
 
-        return orderRepository.save(order);
+        customer.addOrder(order);
+        orderRepository.save(order);
+        userRepository.save(customer);
+
+        return order;
     }
 
     @Transactional(readOnly = true)

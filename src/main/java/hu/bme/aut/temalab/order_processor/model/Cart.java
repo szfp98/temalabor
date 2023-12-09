@@ -14,6 +14,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @EqualsAndHashCode(of = "id")
 public class Cart {
     @Id
@@ -29,12 +30,16 @@ public class Cart {
     private User user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<CartItem> cartItems = new HashSet<>();
+    private Set<CartItem> cartItems;
 
     public Set<CartItem> getContent() { return new HashSet<>(cartItems); }
 
     public void addItem(CartItem ci) {
-    	cartItems.add(ci);
+        if(ci==null)
+            throw new IllegalArgumentException("Cart item cannot be null.");
+        if(this.cartItems == null)
+            this.cartItems = new HashSet<>();
+        this.cartItems.add(ci);
     }
     public void removeItem(CartItem ci) {
     	cartItems.remove(ci);
