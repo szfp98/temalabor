@@ -8,7 +8,6 @@ import lombok.*;
 @Setter
 //@NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @EqualsAndHashCode(callSuper = true)
-public class OrderManager extends User{
-
-}
+public class OrderManager extends User{ }

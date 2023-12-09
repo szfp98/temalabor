@@ -14,6 +14,7 @@ import hu.bme.aut.temalab.order_processor.enums.Category;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @EqualsAndHashCode(of = "id")
 public class Product {
     @Id
