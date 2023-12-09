@@ -40,6 +40,7 @@ public class Cart {
         if(this.cartItems == null)
             this.cartItems = new HashSet<>();
         this.cartItems.add(ci);
+        ci.setCart(this);
     }
     public void removeItem(CartItem ci) {
     	cartItems.remove(ci);

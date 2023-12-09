@@ -37,7 +37,7 @@ public class Order {
     private String comment;
 
     @ElementCollection
-    private Set<Long> couponIds = new HashSet<>();
+    private Set<Long> couponIds;
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
@@ -49,4 +49,12 @@ public class Order {
 
     @OneToOne
     private Cart cart;
+
+    public void addCoupon(Coupon coupon) {
+        if(coupon == null)
+            throw new IllegalArgumentException("Coupon cannot be null.");
+        if(couponIds == null)
+            couponIds = new HashSet<>();
+        couponIds.add(coupon.getId());
+    }
 }

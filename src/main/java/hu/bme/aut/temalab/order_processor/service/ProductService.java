@@ -1,9 +1,11 @@
 package hu.bme.aut.temalab.order_processor.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import hu.bme.aut.temalab.order_processor.repository.ComponentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final ComponentRepository componentRepository;
 
     @Transactional(readOnly = true)
     public List<Product> getAllProducts() {
@@ -26,11 +29,16 @@ public class ProductService {
 
     @Transactional
     public Product createProduct(String name, Category category, BigDecimal value, List<Component> components) {
-        Product product = new Product();
-        product.setName(name);
-        product.setCategory(category);
-        product.setValue(value);
-        product.setComponents(components);
+        Product product = Product.builder()
+                .name(name)
+                .category(category)
+                .value(value)
+                .components(new ArrayList<>())
+                .build();
+        components.forEach(component -> {
+            product.addComponent(component);
+            componentRepository.save(component);
+        });
         return productRepository.save(product);
     }
 

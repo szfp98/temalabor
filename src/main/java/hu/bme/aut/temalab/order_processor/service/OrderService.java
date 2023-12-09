@@ -64,10 +64,8 @@ public class OrderService {
                 .build();
 
         customer.addOrder(order);
-        orderRepository.save(order);
         userRepository.save(customer);
-
-        return order;
+        return orderRepository.save(order);
     }
 
     @Transactional(readOnly = true)
@@ -95,10 +93,13 @@ public class OrderService {
     }
 
     @Transactional
-    public Order addCouponsToOrder(Long orderId, Set<Long> couponIds) {
+    public Order addCouponToOrder(Long orderId, Long couponId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
-        order.setCouponIds(couponIds);
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new RuntimeException("Coupon not found with id: " + couponId));
+        order.addCoupon(coupon);
+        order.setTotal(calculateTotal(order.getCart(), order.getCouponIds()));
         return orderRepository.save(order);
     }
 
