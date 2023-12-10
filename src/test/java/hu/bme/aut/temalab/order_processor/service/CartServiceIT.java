@@ -64,13 +64,19 @@ public class CartServiceIT {
     @Transactional
     void getCartContentTest(){
         Set<CartItem> cartContent = cartRepository.getById(0L).getCartItems();
-        assertTrue(testCart.getCartItems().equals(cartContent));
+        assertEquals(testCart.getCartItems(), cartContent);
 
     }
 
     @Test
     @Transactional
     void addItemTest(){
+
+    }
+
+    @Test
+    @Transactional
+    void removeItemTest(){
 
     }
 }
