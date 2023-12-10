@@ -2,6 +2,7 @@ package hu.bme.aut.temalab.order_processor.model;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import hu.bme.aut.temalab.order_processor.enums.Category;
 import hu.bme.aut.temalab.order_processor.enums.Unit;
 import jakarta.persistence.*;
@@ -32,7 +33,8 @@ public class Component {
     @Enumerated(EnumType.STRING)
     private Unit unit;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
+    @JsonBackReference
     private Product product;
 }
