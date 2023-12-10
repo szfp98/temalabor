@@ -1,8 +1,12 @@
 package hu.bme.aut.temalab.order_processor.controller;
 
 import hu.bme.aut.temalab.order_processor.controller.dto.OrderDto;
+import hu.bme.aut.temalab.order_processor.controller.dto.OrderRequestDto;
 import hu.bme.aut.temalab.order_processor.controller.dto.OrderStatusDto;
 import hu.bme.aut.temalab.order_processor.enums.OrderStatus;
+import hu.bme.aut.temalab.order_processor.enums.PaymentMethod;
+import hu.bme.aut.temalab.order_processor.enums.ShippingMethod;
+import hu.bme.aut.temalab.order_processor.model.Address;
 import hu.bme.aut.temalab.order_processor.model.Order;
 import hu.bme.aut.temalab.order_processor.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -99,6 +103,27 @@ public class OrderController {
         } catch (Exception e) {
             log.error("Error updating order status", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<OrderDto> createOrder(@RequestBody OrderRequestDto orderRequestDto) {
+        log.debug("Received request to create new order: {}", orderRequestDto);
+        try {
+            Order order = orderService.createOrder(orderRequestDto.getUserId(),
+                    orderRequestDto.getCartId(),
+                    modelMapper.map(orderRequestDto.getShippingAddress(), Address.class),
+                    PaymentMethod.valueOf(orderRequestDto.getPaymentMethod()),
+                    ShippingMethod.valueOf(orderRequestDto.getShippingMethod()));
+            OrderDto orderDto = modelMapper.map(order, OrderDto.class);
+            log.debug("New order created with id: {}", order.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(orderDto);
+        } catch (RuntimeException e) {
+            log.error("Error creating order", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            log.error("Unexpected error creating order", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 }
