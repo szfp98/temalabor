@@ -24,42 +24,29 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class CartController {
-
-
     private final CartService cartService;
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public ResponseEntity<Set<CartItemDto>> getCartContent(@RequestParam Long userId) {
-        try{
-            Set<CartItem> cartContent = cartService.getCartContent(userId);
-            Set<CartItemDto> cid = cartContent.stream().map(cartItem -> modelMapper.map(cartItem, CartItemDto.class)).collect(Collectors.toSet());
-            return ResponseEntity.ok(cid);
-
-        }
-        catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    public ResponseEntity<CartItemDto> getCartById(Long id) {
-        try{
-            Optional<Cart> ci = cartService.getCartbyId(id);
-            if(ci.isPresent()){
-                CartItemDto cid = modelMapper.map(ci.get(), CartItemDto.class);
-                return ResponseEntity.ok(cid);
+    public ResponseEntity<?> getCart(@RequestParam(required = false) Long userId,
+                                     @RequestParam(required = false) Long id) {
+        try {
+            if (userId != null) {
+                return getCartContentForUser(userId);
+            } else if (id != null) {
+                return getCartById(id);
+            } else {
+                log.error("No valid parameters provided for cart retrieval");
+                return ResponseEntity.badRequest().body("Missing or invalid parameters");
             }
-            else{
-                return ResponseEntity.notFound().build();
-            }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
+            log.error("Error occurred while retrieving cart", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PostMapping
-    private ResponseEntity<CartDto> addItemtToCart(Long Id, Long pId, Integer qty) {
+    private ResponseEntity<CartDto> addItemtToCart(@RequestParam Long Id, @RequestParam Long pId, @RequestParam Integer qty) {
         try {
             if(qty > 0){
                 Cart cart = cartService.addItemToCart(Id, pId, qty);
@@ -74,13 +61,31 @@ public class CartController {
     }
 
     @DeleteMapping
-    private ResponseEntity<CartDto> removeItemFromCart(Long cId, Long cartItemId){
+    private ResponseEntity<CartDto> removeItemFromCart(@RequestParam Long cId, @RequestParam Long cartItemId){
         try{
             cartService.removeItemFromCart(cId, cartItemId);
             return ResponseEntity.ok().build();
         }
         catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    private ResponseEntity<Set<CartItemDto>> getCartContentForUser(Long userId) {
+        Set<CartItem> cartContent = cartService.getCartContent(userId);
+        Set<CartItemDto> cartItemDtos = cartContent.stream()
+                .map(cartItem -> modelMapper.map(cartItem, CartItemDto.class))
+                .collect(Collectors.toSet());
+        return ResponseEntity.ok(cartItemDtos);
+    }
+
+    private ResponseEntity<CartItemDto> getCartById(Long id) {
+        Optional<Cart> cart = cartService.getCartbyId(id);
+        if (cart.isPresent()) {
+            CartItemDto cartItemDto = modelMapper.map(cart.get(), CartItemDto.class);
+            return ResponseEntity.ok(cartItemDto);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 

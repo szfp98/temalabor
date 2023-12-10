@@ -1,5 +1,6 @@
 package hu.bme.aut.temalab.order_processor.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,6 +17,8 @@ public class CartItem {
     private long id;
 
     @ManyToOne
+    @JoinColumn(name = "cart_id")
+    @JsonBackReference
     private Cart cart;
 
     @ManyToOne
