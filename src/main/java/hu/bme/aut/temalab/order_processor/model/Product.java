@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import hu.bme.aut.temalab.order_processor.enums.Category;
 
 @Entity
