@@ -40,6 +40,14 @@
             width: 200px;
             border-radius: 5px;
         }
+        .content {
+            display: flex;
+            justify-content: space-between;
+        }
+        .product-list, .product-creation {
+            width: 48%;
+        }
+
     </style>
 </head>
 <body>
@@ -59,49 +67,99 @@
         </form>
     </div>
 
-    <div style="padding: 20px;">
-        <ul>
-            <li th:each="product : ${products}">
-                <h3 th:text="${product.name}">Product Name</h3>
-                <p>Category: <span th:text="${product.category}">Category</span></p>
-                <p>Value: <span th:text="${product.value}">Value</span></p>
+    <div class="content">
+        <div class="product-list" style="padding: 20px;">
+            <div style="padding: 20px;">
+                <ul>
+                    <li th:each="product : ${products}">
+                        <h3 th:text="${product.name}">Product Name</h3>
+                        <p>Id: <span th:text="${product.id}">id</span></p>
+                        <p>Category: <span th:text="${product.category}">Category</span></p>
+                        <p>Value: <span th:text="${product.value}">Value</span></p>
+        
+                        <div>
+                            <h4>Components</h4>
+                            <ul>
+                                <li th:each="component : ${product.components}">
+                                    <p>Name: <span th:text="${component.name}">Name</span></p>
+                                </li>
+                            </ul>
+                        </div>
+        
+        
+                        <button class="add-to-cart" th:attr="data-product-id=${product.id}" onclick="addToCart(this)">Add to Cart</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
 
-                <div>
-                    <h4>Components</h4>
-                    <ul>
-                        <li th:each="component : ${product.components}">
-                            <p>Name: <span th:text="${component.name}">Name</span></p>
-                        </li>
-                    </ul>
-                </div>
+        <div class="product-creation">
+            <h2>Create Product</h2>
+            <form action="/create" method="post">
+                <input type="text" name="name" placeholder="Product Name" required><br>
+                <input type="number" name="value" placeholder="Price" required><br>
+                <input type="text" name="category" placeholder="Category" required><br>
+                <button type="submit" class="button">Create Product</button>
+            </form>
+        </div>
 
-
-                <button class="add-to-cart" th:attr="data-product-id=${product.id}" onclick="addToCart(this)">Add to Cart</button>
-            </li>
-        </ul>
+        <h2>Delete Product</h2>
+    <form action="/delete" method="post">
+        <input type="number" name="id" placeholder="Product ID" required><br>
+        <button type="submit" class="button">Delete Product</button>
+    </form>
     </div>
+    
+
+    
     <script>
+        function getCartId(userId) {
+            return fetch('/api/cart?userId=' + userId)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to retrieve cart');
+                    }
+                })
+                .then(data => {
+                    return data.length > 0 ? data[0].id : null;
+                });
+        }
+    
         function addToCart(button) {
             let productId = button.getAttribute('data-product-id');
-            let userId = 1; //Itt csak beírtam valamit de itt le kéne kérni a userid-t
-            let quantity = 1; 
-        
-            fetch('/api/cart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'Id=' + userId + '&pId=' + productId + '&qty=' + quantity
-            })
-            .then(response => {
-                if (response.ok) {
-                    alert("Product added to cart!");
+            let userId = 1;  // Replace this with logic to retrieve the current user's ID
+            let quantity = 1;
+    
+            getCartId(userId).then(cartId => {
+                if (cartId) {
+                    fetch('/api/cart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'id=' + cartId + '&pId=' + productId + '&qty=' + quantity
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert("Product added to cart!");
+                        } else {
+                            alert("Failed to add product to cart.");
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
                 } else {
-                    alert("Failed to add product to cart.");
+                    alert("No cart found for user.");
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Failed to retrieve cart information.");
+            });
         }
-        </script>
+    </script>
+    
+    
 </body>
 </html>
