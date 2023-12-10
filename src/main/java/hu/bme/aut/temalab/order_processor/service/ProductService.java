@@ -84,6 +84,6 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<Product> searchProductsByName(String name) {
-        return productRepository.findByNameContaining(name);
+        return productRepository.findByNameContainingIgnoreCase(name);
     }
 }
