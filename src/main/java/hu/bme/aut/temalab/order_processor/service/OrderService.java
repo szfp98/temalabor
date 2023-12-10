@@ -5,10 +5,7 @@ import hu.bme.aut.temalab.order_processor.enums.ShippingMethod;
 import hu.bme.aut.temalab.order_processor.model.*;
 import hu.bme.aut.temalab.order_processor.model.users.Customer;
 import hu.bme.aut.temalab.order_processor.model.users.User;
-import hu.bme.aut.temalab.order_processor.repository.CartRepository;
-import hu.bme.aut.temalab.order_processor.repository.CouponRepository;
-import hu.bme.aut.temalab.order_processor.repository.OrderRepository;
-import hu.bme.aut.temalab.order_processor.repository.UserRepository;
+import hu.bme.aut.temalab.order_processor.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
@@ -30,6 +27,7 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
     private final CouponRepository couponRepository;
+    private final AddressRepository addressRepository;
 
     @Transactional
     public List<Order> getAllOrders() {
@@ -59,6 +57,8 @@ public class OrderService {
         if (cart.getCartItems().isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
+
+        shippingAddress = addressRepository.save(shippingAddress);
 
         Order order = Order.builder()
                 .user(customer)
