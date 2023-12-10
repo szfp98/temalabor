@@ -76,9 +76,32 @@
                 </div>
 
 
-                <button class="add-to-cart" th:attr="data-product-id=${product.id}">Add to Cart</button>
+                <button class="add-to-cart" th:attr="data-product-id=${product.id}" onclick="addToCart(this)">Add to Cart</button>
             </li>
         </ul>
     </div>
+    <script>
+        function addToCart(button) {
+            let productId = button.getAttribute('data-product-id');
+            let userId = 1; //Itt csak beírtam valamit de itt le kéne kérni a userid-t
+            let quantity = 1; 
+        
+            fetch('/api/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'Id=' + userId + '&pId=' + productId + '&qty=' + quantity
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("Product added to cart!");
+                } else {
+                    alert("Failed to add product to cart.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        </script>
 </body>
 </html>
