@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import hu.bme.aut.temalab.order_processor.repository.CartItemRepository;
 import hu.bme.aut.temalab.order_processor.repository.ComponentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ComponentRepository componentRepository;
+    private final CartItemRepository cartItemRepository;
 
     @Transactional(readOnly = true)
     public List<Product> getAllProducts() {
@@ -66,7 +68,18 @@ public class ProductService {
 
     @Transactional
     public void deleteProduct(long id) {
-        productRepository.deleteById(id);
+        Optional<Product> productOpt = productRepository.findById(id);
+        if (productOpt.isPresent()) {
+            Product product = productOpt.get();
+
+            cartItemRepository.deleteByProduct(product);
+
+            componentRepository.deleteByProduct(product);
+
+            productRepository.delete(product);
+        } else {
+            throw new EntityNotFoundException("Product with id " + id + " not found");
+        }
     }
 
     @Transactional(readOnly = true)
