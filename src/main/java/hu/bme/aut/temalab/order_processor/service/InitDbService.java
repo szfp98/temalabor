@@ -35,7 +35,7 @@ public class InitDbService {
 
             for (int i = 0; i < users.size(); i++) {
                 Cart cart = cartService.createCart(users.get(i).getId());
-                cartService.addItemToCart(cart.getId(), products.get(i).getId(), i + 1);
+                cart = cartService.addItemToCart(cart.getId(), products.get(i).getId(), i + 1);
 
                 String zipCode = "1234" + i;
                 String city = "Város " + i;

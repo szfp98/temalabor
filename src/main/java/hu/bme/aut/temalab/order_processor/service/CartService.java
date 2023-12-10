@@ -13,6 +13,7 @@ import hu.bme.aut.temalab.order_processor.model.users.User;
 import hu.bme.aut.temalab.order_processor.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,10 +87,22 @@ public class CartService {
         cartRepository.save(cart);
     }
 
-    @Transactional
-    public Optional<Cart> getCartbyId(Long id){
-        return cartRepository.findById(id);
+    @Transactional(readOnly = true)
+    public Optional<Cart> getCartbyId(Long id) {
+        Optional<Cart> cartOpt = cartRepository.findById(id);
+        if (cartOpt.isPresent()) {
+            Cart cart = cartOpt.get();
+            Hibernate.initialize(cart.getCartItems());
+            for (CartItem item : cart.getCartItems()) {
+                Hibernate.initialize(item.getProduct());
+                log.info("Product loaded: " + item.getProduct().getName());
+            }
+            log.info("Cart loaded with items: " + cart.getCartItems().size());
+            return Optional.of(cart);
+        }
+        return cartOpt;
     }
+
 
     @Transactional
     public Cart updateCartStatus(Long cartId, CartStatus newStatus) {
@@ -101,10 +114,11 @@ public class CartService {
     }
 
     @Transactional(readOnly = true)
-    public Set<CartItem> getCartContent(Long cartId) {
-        return cartRepository.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Cart not found with id: " + cartId))
-                .getCartItems();
+    public Set<CartItem> getCartContent(Long userId) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found for user: " + userId));
+        Hibernate.initialize(cart.getCartItems());
+        return cart.getCartItems();
     }
 
     private BigDecimal calculateSubtotal(Long cartId) {
