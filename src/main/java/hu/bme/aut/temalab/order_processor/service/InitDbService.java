@@ -55,6 +55,7 @@ public class InitDbService {
             }
 
             setAnotherUserAndCart();
+            setAnotherUser();
 
         } catch (Exception e) {
             log.error("Error initializing database: {}", e.getMessage());
@@ -110,6 +111,10 @@ public class InitDbService {
         Product product = productService.createProduct("Termék 4", Category.ELECTRONICS, new BigDecimal(1000), Arrays.asList(component7, component8));
         Cart cart = cartService.createCart(user.getId());
         cartService.addItemToCart(cart.getId(), product.getId(), 2);
+    }
+
+    private void setAnotherUser(){
+        Customer user = userRepository.save(Customer.builder().name("Test User 2").email("test.user.2@example.com").build());
     }
 
 }
