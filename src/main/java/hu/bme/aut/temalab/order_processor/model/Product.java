@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import hu.bme.aut.temalab.order_processor.enums.Category;
 
 @Entity
@@ -30,7 +32,8 @@ public class Product {
     @Column(name = "product_value")
     private BigDecimal value;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<Component> components;
 
     public BigDecimal getPrice() {
