@@ -46,16 +46,26 @@ public class CartController {
     }
 
     @PostMapping
-    private ResponseEntity<CartDto> addItemtToCart(@RequestParam Long Id, @RequestParam Long pId, @RequestParam Integer qty) {
+    public ResponseEntity<CartDto> addItemToCart(@RequestParam(required = false) Long id,
+                                                 @RequestParam(required = false) Long pId,
+                                                 @RequestParam(required = false) Integer qty,
+                                                 @RequestParam(required = false) Long userId) {
         try {
-            if(qty > 0){
-                Cart cart = cartService.addItemToCart(Id, pId, qty);
-                CartDto cartDto = modelMapper.map(cart, CartDto.class);
-                return ResponseEntity.ok(cartDto);
+            Cart cart;
+            if (id != null) {
+                cart = cartService.addItemToCart(id, pId, qty);
+            } else if (userId != null) {
+                cart = cartService.createCart(userId);
+                if (pId != null && qty != null) {
+                    cart = cartService.addItemToCart(cart.getId(), pId, qty);
+                }
+            } else {
+                return ResponseEntity.badRequest().body(null);
             }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-        catch (Exception e){
+
+            CartDto cartDto = modelMapper.map(cart, CartDto.class);
+            return ResponseEntity.ok(cartDto);
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

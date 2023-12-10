@@ -37,10 +37,6 @@ public class CartService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        if (!(user instanceof Customer)) {
-            throw new RuntimeException("User with id: " + userId + " is not a customer");
-        }
-
         Cart cart = Cart.builder()
                 .status(CartStatus.OPEN)
                 .user(user)
