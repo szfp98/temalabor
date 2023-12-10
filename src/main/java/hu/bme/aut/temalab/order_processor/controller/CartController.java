@@ -1,5 +1,6 @@
 package hu.bme.aut.temalab.order_processor.controller;
 
+import hu.bme.aut.temalab.order_processor.controller.dto.CartDto;
 import hu.bme.aut.temalab.order_processor.controller.dto.CartItemDto;
 import hu.bme.aut.temalab.order_processor.controller.dto.OrderDto;
 import hu.bme.aut.temalab.order_processor.model.Cart;
@@ -11,10 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,6 +58,30 @@ public class CartController {
         }
     }
 
-    
+    @PostMapping
+    private ResponseEntity<CartDto> addItemtToCart(Long Id, Long pId, Integer qty) {
+        try {
+            if(qty > 0){
+                Cart cart = cartService.addItemToCart(Id, pId, qty);
+                CartDto cartDto = modelMapper.map(cart, CartDto.class);
+                return ResponseEntity.ok(cartDto);
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DeleteMapping
+    private ResponseEntity<CartDto> removeItemFromCart(Long cId, Long cartItemId){
+        try{
+            cartService.removeItemFromCart(cId, cartItemId);
+            return ResponseEntity.ok().build();
+        }
+        catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 }
