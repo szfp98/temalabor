@@ -54,6 +54,8 @@ public class InitDbService {
                 orderService.addCouponToOrder(order.getId(), coupon.getId());
             }
 
+            setAnotherUserAndCart();
+
         } catch (Exception e) {
             log.error("Error initializing database: {}", e.getMessage());
         }
@@ -99,6 +101,15 @@ public class InitDbService {
                 .targetCategory(targetCategory)
                 .value(value)
                 .build());
+    }
+
+    private void setAnotherUserAndCart(){
+        Customer user = userRepository.save(Customer.builder().name("Test User").email("test.user@example.com").build());
+        Component component7 = componentRepository.save(Component.builder().name("Komponens 4.1").category(Category.ELECTRONICS).value(new BigDecimal(1)).unit(Unit.KG).build());
+        Component component8 = componentRepository.save(Component.builder().name("Komponens 4.2").category(Category.ELECTRONICS).value(new BigDecimal(1)).unit(Unit.KG).build());
+        Product product = productService.createProduct("Termék 4", Category.ELECTRONICS, new BigDecimal(1000), Arrays.asList(component7, component8));
+        Cart cart = cartService.createCart(user.getId());
+        cartService.addItemToCart(cart.getId(), product.getId(), 2);
     }
 
 }

@@ -11,6 +11,7 @@ import hu.bme.aut.temalab.order_processor.repository.OrderRepository;
 import hu.bme.aut.temalab.order_processor.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +31,16 @@ public class OrderService {
     private final UserRepository userRepository;
     private final CouponRepository couponRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Order> getAllOrders() {
         log.info("Fetching all orders");
-        return orderRepository.findAll();
+        List<Order> orders = orderRepository.findAll();
+        orders.forEach(order -> {
+            Hibernate.initialize(order.getCart().getCartItems());
+            Hibernate.initialize(order.getUser());
+            Hibernate.initialize(order.getAddress());
+        });
+        return orders;
     }
 
     @Transactional
@@ -71,7 +78,15 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Optional<Order> getOrderById(Long id) {
         log.info("Fetching order with id {}", id);
-        return orderRepository.findById(id);
+        Optional<Order> orderOpt = orderRepository.findById(id);
+        if (orderOpt.isPresent()) {
+            Order order = orderOpt.get();
+            Hibernate.initialize(order.getCart().getCartItems());
+            Hibernate.initialize(order.getUser());
+            Hibernate.initialize(order.getAddress());
+            return Optional.of(order);
+        }
+        return orderOpt;
     }
 
     @Transactional(readOnly = true)
@@ -79,7 +94,13 @@ public class OrderService {
         log.info("Fetching orders for user {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-        return orderRepository.findByUser(user);
+        List<Order> orders = orderRepository.findByUser(user);
+        orders.forEach(order -> {
+            Hibernate.initialize(order.getCart().getCartItems());
+            Hibernate.initialize(order.getUser());
+            Hibernate.initialize(order.getAddress());
+        });
+        return orders;
     }
 
 
@@ -88,6 +109,9 @@ public class OrderService {
         log.info("Updating order {} status to {}", id, status);
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+        Hibernate.initialize(order.getCart().getCartItems());
+        Hibernate.initialize(order.getUser());
+        Hibernate.initialize(order.getAddress());
         order.setStatus(status);
         return orderRepository.save(order);
     }
