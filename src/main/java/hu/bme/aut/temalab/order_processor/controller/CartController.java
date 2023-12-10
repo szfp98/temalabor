@@ -79,11 +79,11 @@ public class CartController {
         return ResponseEntity.ok(cartItemDtos);
     }
 
-    private ResponseEntity<CartItemDto> getCartById(Long id) {
+    private ResponseEntity<CartDto> getCartById(Long id) {
         Optional<Cart> cart = cartService.getCartbyId(id);
         if (cart.isPresent()) {
-            CartItemDto cartItemDto = modelMapper.map(cart.get(), CartItemDto.class);
-            return ResponseEntity.ok(cartItemDto);
+            CartDto cartDto = modelMapper.map(cart.get(), CartDto.class);
+            return ResponseEntity.ok(cartDto);
         } else {
             return ResponseEntity.notFound().build();
         }
