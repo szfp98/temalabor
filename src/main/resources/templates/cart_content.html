@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -12,7 +13,9 @@
             background-color: #f8f8f8;
             padding: 10px;
         }
-        .button, .plus-minus {
+
+        .button,
+        .plus-minus {
             padding: 5px 15px;
             text-align: center;
             background-color: #007bff;
@@ -21,57 +24,42 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        .button:hover, .plus-minus:hover {
+
+        .button:hover,
+        .plus-minus:hover {
             background-color: #0056b3;
         }
     </style>
+    <script src="/js/scripts.js"></script>
 </head>
+
 <body>
-<div class="top-bar">
-    <h2>Cart</h2>
-    <div class="top-bar-buttons" th:each="subt : ${subtotal}">
-        <h2 th:text="${subtotal}">Subtotal</h2>
+    <div class="top-bar">
+        <h2>Cart</h2>
     </div>
-</div>
-<div style="padding: 20px;">
-    <ul>
-        <li th:each="ci : ${cartitems}">
-            <h3 th:text="${ci.getProduct().getName()}">Product Name</h3>
-            <p>Category: <span th:text="${ci.getProduct().getCategory()}">Category</span></p>
-            <p>Value: <span th:text="${ci.getProduct().getPrice()}">Price</span></p>
-            <div>
-                <h4>Components</h4>
-                <ul>
-                    <li th:each="component : ${ci.getProduct().components}">
-                        <p>Name: <span th:text="${component.name}">Name</span></p>
-                    </li>
-                </ul>
-            </div>
-            <button class="plus-minus" th:attr="data-ci-id=${ci.id}" onclick="plus(this)">+</button>
-            <button class="plus-minus" th:attr="data-ci-id=${ci.id}" onclick="minus(this)">-</button>
-        </li>
-    </ul>
+    <div style="padding: 20px;">
+        <ul>
+            <li th:each="ci : ${cartitems}">
+                <h3 th:text="${ci.getProduct().getName()}">Product Name</h3>
+                <p>Category: <span th:text="${ci.getProduct().getCategory()}">Category</span></p>
+                <p>Value: <span th:text="${ci.getProduct().getPrice()}">Price</span></p>
+                <div>
+                    <h4>Components</h4>
+                    <ul>
+                        <li th:each="component : ${ci.getProduct().components}">
+                            <p>Name: <span th:text="${component.name}">Name</span></p>
+                        </li>
+                    </ul>
+                </div>
+                <button class="button" th:attr="data-ci-id=${ci.id}" onclick="deleteProduct(this)">Delete</button>
+            </li>
+        </ul>
 
-</div>
-<script>
-    function plus(button){
-        let cartItemId = button.getAttribute('data-ci-id');
-        let userId = 1; //Itt csak beírtam valamit de itt le kéne kérni a userid-t
-
-        //ide kéne a fetch, de nem teljesen értem, hogyan kellene növeli a mennyiségét
-
-    }
-
-    function minus(button){
-        let cartItemId = button.getAttribute('data-ci-id');
-        let userId = 1; //Itt csak beírtam valamit de itt le kéne kérni a userid-t
-
-        //ide kéne a fetch, de nem teljesen értem, hogyan kellene csökkenteni a mennyiségét
-
-    }
-
-
-</script>
+    </div>
+    <form action="/createorder" method="post">
+        <button type="submit" class="button">Create order</button>
+    </form>
 
 </body>
+
 </html>
