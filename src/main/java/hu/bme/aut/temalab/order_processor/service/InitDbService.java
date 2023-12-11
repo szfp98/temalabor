@@ -50,8 +50,6 @@ public class InitDbService {
                 Address address = createAddress(users.get(i), zipCode, city, street, houseNumber, comment);
                 Coupon coupon = createCoupon(couponName, couponCategory, couponValue);
 
-                Order order = orderService.createOrder(users.get(i).getId(), cart.getId(), address, PaymentMethod.values()[i % PaymentMethod.values().length], ShippingMethod.values()[i % ShippingMethod.values().length]);
-                orderService.addCouponToOrder(order.getId(), coupon.getId());
             }
 
             setAnotherUserAndCart();
@@ -66,26 +64,35 @@ public class InitDbService {
         return Arrays.asList(
                 userRepository.save(Customer.builder().name("John Doe").email("john.doe@example.com").build()),
                 userRepository.save(Customer.builder().name("Jane Doe").email("jane.doe@example.com").build()),
-                userRepository.save(Customer.builder().name("Jim Beam").email("jim.beam@example.com").build())
-        );
+                userRepository.save(Customer.builder().name("Jim Beam").email("jim.beam@example.com").build()));
     }
 
     private List<Product> createProductsAndComponents() {
-        Component component1 = componentRepository.save(Component.builder().name("Komponens 1.1").category(Category.ELECTRONICS).value(new BigDecimal(1)).unit(Unit.KG).build());
-        Component component2 = componentRepository.save(Component.builder().name("Komponens 1.2").category(Category.ELECTRONICS).value(new BigDecimal(1)).unit(Unit.KG).build());
-        Component component3 = componentRepository.save(Component.builder().name("Komponens 2.1").category(Category.BOOKS).value(new BigDecimal(1)).unit(Unit.X).build());
-        Component component4 = componentRepository.save(Component.builder().name("Komponens 2.2").category(Category.BOOKS).value(new BigDecimal(1)).unit(Unit.X).build());
-        Component component5 = componentRepository.save(Component.builder().name("Komponens 3.1").category(Category.CLOTHING).value(new BigDecimal(1)).unit(Unit.G).build());
-        Component component6 = componentRepository.save(Component.builder().name("Komponens 3.2").category(Category.CLOTHING).value(new BigDecimal(1)).unit(Unit.G).build());
+        Component component1 = componentRepository.save(Component.builder().name("Komponens 1.1")
+                .category(Category.ELECTRONICS).value(new BigDecimal(1)).unit(Unit.KG).build());
+        Component component2 = componentRepository.save(Component.builder().name("Komponens 1.2")
+                .category(Category.ELECTRONICS).value(new BigDecimal(1)).unit(Unit.KG).build());
+        Component component3 = componentRepository.save(Component.builder().name("Komponens 2.1")
+                .category(Category.BOOKS).value(new BigDecimal(1)).unit(Unit.X).build());
+        Component component4 = componentRepository.save(Component.builder().name("Komponens 2.2")
+                .category(Category.BOOKS).value(new BigDecimal(1)).unit(Unit.X).build());
+        Component component5 = componentRepository.save(Component.builder().name("Komponens 3.1")
+                .category(Category.CLOTHING).value(new BigDecimal(1)).unit(Unit.G).build());
+        Component component6 = componentRepository.save(Component.builder().name("Komponens 3.2")
+                .category(Category.CLOTHING).value(new BigDecimal(1)).unit(Unit.G).build());
 
-        Product product1 = productService.createProduct("Termék 1", Category.ELECTRONICS, new BigDecimal(1000), Arrays.asList(component1, component2));
-        Product product2 = productService.createProduct("Termék 2", Category.BOOKS, new BigDecimal(2000), Arrays.asList(component3, component4));
-        Product product3 = productService.createProduct("Termék 3", Category.CLOTHING, new BigDecimal(3000), Arrays.asList(component5, component6));
+        Product product1 = productService.createProduct("Termék 1", Category.ELECTRONICS, new BigDecimal(1000),
+                Arrays.asList(component1, component2));
+        Product product2 = productService.createProduct("Termék 2", Category.BOOKS, new BigDecimal(2000),
+                Arrays.asList(component3, component4));
+        Product product3 = productService.createProduct("Termék 3", Category.CLOTHING, new BigDecimal(3000),
+                Arrays.asList(component5, component6));
 
         return Arrays.asList(product1, product2, product3);
     }
 
-    private Address createAddress(Customer user, String zipCode, String city, String street, String houseNumber, String comment) {
+    private Address createAddress(Customer user, String zipCode, String city, String street, String houseNumber,
+            String comment) {
         return addressRepository.save(Address.builder()
                 .user(user)
                 .zipCode(zipCode)
@@ -104,17 +111,22 @@ public class InitDbService {
                 .build());
     }
 
-    private void setAnotherUserAndCart(){
-        Customer user = userRepository.save(Customer.builder().name("Test User").email("test.user@example.com").build());
-        Component component7 = componentRepository.save(Component.builder().name("Komponens 4.1").category(Category.ELECTRONICS).value(new BigDecimal(1)).unit(Unit.KG).build());
-        Component component8 = componentRepository.save(Component.builder().name("Komponens 4.2").category(Category.ELECTRONICS).value(new BigDecimal(1)).unit(Unit.KG).build());
-        Product product = productService.createProduct("Termék 4", Category.ELECTRONICS, new BigDecimal(1000), Arrays.asList(component7, component8));
+    private void setAnotherUserAndCart() {
+        Customer user = userRepository
+                .save(Customer.builder().name("Test User").email("test.user@example.com").build());
+        Component component7 = componentRepository.save(Component.builder().name("Komponens 4.1")
+                .category(Category.ELECTRONICS).value(new BigDecimal(1)).unit(Unit.KG).build());
+        Component component8 = componentRepository.save(Component.builder().name("Komponens 4.2")
+                .category(Category.ELECTRONICS).value(new BigDecimal(1)).unit(Unit.KG).build());
+        Product product = productService.createProduct("Termék 4", Category.ELECTRONICS, new BigDecimal(1000),
+                Arrays.asList(component7, component8));
         Cart cart = cartService.createCart(user.getId());
         cartService.addItemToCart(cart.getId(), product.getId(), 2);
     }
 
-    private void setAnotherUser(){
-        Customer user = userRepository.save(Customer.builder().name("Test User 2").email("test.user.2@example.com").build());
+    private void setAnotherUser() {
+        Customer user = userRepository
+                .save(Customer.builder().name("Test User 2").email("test.user.2@example.com").build());
     }
 
 }
